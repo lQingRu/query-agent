@@ -1,0 +1,12 @@
+{
+    "[python]": {
+        "editor.wordBasedSuggestions": "off",
+        "editor.formatOnSave": true,
+        "editor.formatOnPaste": true,
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit",
+            "source.unusedImports": "explicit"
+        }
+    },
+}
