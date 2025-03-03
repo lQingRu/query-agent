@@ -22,6 +22,7 @@ class EvaluationAgent(CodeAgent):
             name="evaluation_agent",
             description="Evaluates the original and refined queries ",
         )
+        # TODO: Based off logs, this prompt doesn't seem to be passed in
         self.system_prompt = """
         Role: You are an evaluation agent responsible for assessing the quality of refined queries for semantic search. Your goal is to determine which refined query is most effective for retrieving relevant and high-quality information.
 
