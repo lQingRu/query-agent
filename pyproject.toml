@@ -5,7 +5,7 @@ description = "Default template for PDM package"
 authors = [
     {name = "qingru97", email = "qingru97@gmail.com"},
 ]
-dependencies = ["ollama>=0.4.7", "pytest>=8.3.5", "pydantic-settings>=2.8.1", "pydantic>=2.10.6", "huggingface-hub>=0.29.1", "numpy>=2.2.3", "smolagents>=1.9.2", "asyncio>=3.4.3", "litellm>=1.61.20"]
+dependencies = ["ollama>=0.4.7", "pytest>=8.3.5", "pydantic-settings>=2.8.1", "pydantic>=2.10.6", "huggingface-hub>=0.29.1", "numpy>=2.2.3", "asyncio>=3.4.3", "langchain>=0.3.20", "langchain-ollama>=0.2.3", "langgraph>=0.3.10", "grandalf>=0.8"]
 requires-python = "==3.13.*"
 readme = "README.md"
 license = {text = "MIT"}
@@ -15,6 +15,6 @@ license = {text = "MIT"}
 distribution = false
 
 [tool.pdm.scripts]
-start = "python entry.py"
+start = "python graph.py"
 test = "pytest tests/"
 working_dir = "."
