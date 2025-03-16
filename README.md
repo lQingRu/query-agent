@@ -29,3 +29,18 @@ month]?', 'Recent diplomatic interactions between Ukraine and the US in [specifi
 'Current events related to Ukraine-US relations published in [last month/year].'],
 'similarities': [0.0, 0.0, 0.0, 0.0]}
 ```
+
+# Agent Framework
+
+## Langgraph
+
+- Parallelizing node execution:
+  - https://langchain-ai.github.io/langgraph/how-tos/branching/#parallel-node-fan-out-and-fan-in-with-extra-steps
+- Langgraph
+  - Types: https://langchain-ai.github.io/langgraph/reference/types/#langgraph.types.Send
+  - Recursion: https://langchain-ai.github.io/langgraph/how-tos/recursion-limit/#loops-with-branches
+  - Orchestrator-worker: https://langchain-ai.github.io/langgraph/tutorials/workflows/#orchestrator-worker
+- Example projects
+
+  - Multi-agent with supervisor: https://github.com/langchain-ai/langgraph/blob/main/docs/docs/tutorials/multi_agent/agent_supervisor.ipynb
+  - Guide to build first AI Agent: https://medium.com/data-science-collective/the-complete-guide-to-building-your-first-ai-agent-its-easier-than-you-think-c87f376c84b2
