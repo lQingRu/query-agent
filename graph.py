@@ -1,88 +1,53 @@
-from typing import TypedDict
+from agents.evaluation.abbreviations import abbreviations_eval
+from agents.evaluation.evaluator_orchestrator import evaluation_orchestrator
+from agents.evaluation.question_structure import question_structure_eval_agent
+from agents.evaluation.domain_specific_terms import domain_specific_terms_eval_agent
 
-from agents.evaluation_agent import EvaluatorOutput, evaluate_questions
-from agents.refiner_agent import (
-    RefinerOutput,
-    refine_question,
-    refine_question_with_feedback,
-)
+from agents.evaluation.keywords import keywords_eval_agent
 
-from langgraph.graph import END, StateGraph, START
+from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import MemorySaver
 
+from agents.refinement.refine_question import refine_question_eval
+from agents.state import InitialState
 
-class OverallState(TypedDict):
-    original_question: str
-    refiner_output: RefinerOutput
-    evaluator_output: EvaluatorOutput
-    retries: int = 0
+builder = StateGraph(InitialState)
+builder.add_node(question_structure_eval_agent)
+builder.add_node(abbreviations_eval)
+builder.add_node(keywords_eval_agent)
+builder.add_node(domain_specific_terms_eval_agent)
+builder.add_node(refine_question_eval)
+builder.add_node(evaluation_orchestrator)
 
+builder.add_edge(START, "question_structure_eval_agent")
+builder.add_edge(START, "abbreviations_eval")
+builder.add_edge(START, "keywords_eval_agent")
+builder.add_edge(START, "domain_specific_terms_eval_agent")
 
-def reflect_refiner_node(state: OverallState):
-    feedback = state["evaluator_output"].model_dump()
-    response = refine_question_with_feedback(
-        question=state["original_question"], feedback=feedback
-    )
-    return {
-        "refiner_output": response,
-        "retries": state["retries"] + 1,
-    }
+builder.add_edge(
+    [
+        "question_structure_eval_agent",
+        "abbreviations_eval",
+        "keywords_eval_agent",
+        "domain_specific_terms_eval_agent",
+    ],
+    "evaluation_orchestrator",
+)
+builder.add_edge("refine_question_eval", END)
 
-
-def refiner_node(state: OverallState) -> OverallState:
-    response = refine_question(question=state["original_question"])
-    return {"refiner_output": response}
-
-
-def evaluator_node(state: OverallState) -> OverallState:
-    response = evaluate_questions(
-        question=state["original_question"],
-        refined_questions=state["refiner_output"]["refined_questions"],
-    )
-    return {"evaluator_output": response}
-
-
-def should_continue(state: OverallState):
-    print(f"Should continue...? Messages: ")
-    if state["retries"] > 2:
-        return END
-
-    if state["evaluator_output"]:
-        print(state)
-        try:
-            if list(state["evaluator_output"]["best_refined_question"])[0].score >= 4:
-                return END
-        except Exception as e:
-            print(f"Failed to evaluate: {e}")
-            return END
-    return "reflect"
-
-
-builder = StateGraph(OverallState)
-builder.add_node("refine", refiner_node)
-builder.add_node("evaluate", evaluator_node)
-builder.add_node("reflect", reflect_refiner_node)
-builder.add_edge(START, "refine")
-builder.add_edge("refine", "evaluate")
-builder.add_conditional_edges("evaluate", should_continue)
-builder.add_edge("reflect", "evaluate")
 memory = MemorySaver()
 graph = builder.compile(checkpointer=memory)
 
+
+def initialize_state(original_question: str) -> InitialState:
+    """Initializes the State with default values."""
+    return {"question": original_question}
+
+
+state = initialize_state("What is the impact of LoRA on transformer efficiency?")
+
 config = {"configurable": {"thread_id": "1"}}
 
-thread = {"configurable": {"thread_id": "2"}}
-results = []
-for s in graph.stream(
-    {
-        "original_question": "Tell me the latest updates on NVDA",
-        "refiner_output": None,
-        "evaluator_output": None,
-        "retries": 0,
-    },
-    thread,
-):
+for s in graph.stream(state, config, stream_mode="values"):
+    print("=====Current Stage====")
     print(s)
-    results.append(s)
-
-print(results)

@@ -1,123 +1,67 @@
-from agents.state import QuestionStructureEval, State
-from langgraph.graph import END, StateGraph, START
+from pydantic import BaseModel, Field
+from agents.state import InitialState
+from config.model import LargeLanguageModel, llm
+from langchain_core.output_parsers import JsonOutputParser
+from langchain_core.prompts import PromptTemplate
 
 
-def question_structure(state: State):
-    question_structure: QuestionStructureEval = {
-        "proposal": "Updates on NewWater in Singapore",
-        "reasoning": "Clarify logical flow",
-        "score": 3,
-    }
-    state["refinements"][-1]["evaluation_results"][
-        "question_structure"
-    ] = question_structure
-    return state
-
-
-def abbreviations(state: State):
-    abbreviation = {
-        "abbreviation": "NWS",
-        "expansion": ["New Water Service"],
-    }
-    abbreviations = [abbreviation]
-
-    state["refinements"][-1]["evaluation_results"]["abbreviation"] = abbreviations
-    return state
-
-
-def domain_specific(state: State):
-    domain_results = {
-        "domain_terms": ["new water"],
-        "proposal": "Replace with synonyms or longer explanations",
-    }
-    state["refinements"][-1]["evaluation_results"][
-        "domain_specific_term"
-    ] = domain_results
-    return state
-
-
-def keyword(state: State):
-    keyword_results = {
-        "keyword": "new water",
-        "expanded_keywords": ["new water", "xing shui"],
-    }
-    state["refinements"][-1]["evaluation_results"]["keyword"] = [keyword_results]
-    return state
-
-
-def open_closed(state: State):
-    open_closed_results = {
-        "proposal": "Be more specific and narrow",
-        "reasoning": "Too broad, recall may be low",
-    }
-    state["refinements"][-1]["evaluation_results"]["open_closed"] = open_closed_results
-    return state
-
-
-def refine_question(state: State):
-    _refined_question = "Provide updates on NewWater requirements in Singapore"
-    state["refinements"][-1]["refined_question_results"].setdefault(
-        _refined_question,
-        {"refined_question": _refined_question},
+class QuestionStructureEval(BaseModel):
+    score: int = Field(
+        description="Numerical score representing quality of the question's structure",
+        min=0,
+        max=5,
     )
-    return state
-
-
-def refinement_evaluation(state: State):
-    _refined_question = "Provide updates on NewWater requirements in Singapore"
-    state["refinements"][-1]["refined_question_results"].setdefault(
-        _refined_question,
-        {
-            "intention_score": 9,
-            "similarity_score": 0.85,
-            "refined_question": _refined_question,
-        },
+    reasoning: str = Field(description="Short reason for the score")
+    proposal: str = Field(
+        description="Suggested improvements, including areas to fix or improve the question",
+        examples=["Reduce ambiguity", "Simplify language"],
     )
-    return state
 
 
-def evaluator(state: State):
-    print("Stage: Evaluating")
-    current_refinement_results = state["refinements"][-1]
-    if current_refinement_results["evaluation_results"]:
+def question_structure_eval_agent(state: InitialState):
+    PROMPT_TEMPLATE = """
+    You are an expert assistance in helping to refine user queries so that the query is best crafted for a precise semantic search.
+    
+    Given the query, evaluate its structure for clarity, coherence, grammatical correctness, and focus, considering the following factors:
 
-        eval_results = current_refinement_results["evaluation_results"]
+    Clarity and Precision: Is the query clear and precise without ambiguity?
 
-        if current_refinement_results["refined_question_results"]:
-            print(
-                f"Refined Questions: {current_refinement_results['refined_question_results']}"
-            )
-            return "refinement_evaluate"
+    Focus on Key Information: Is the question concise and focused on the main topic, avoiding irrelevant details?
 
-        print(f"Evaluation results: {eval_results['question_structure']['score']}")
-        if eval_results["question_structure"]["score"] >= 5:
-            print("Return to user...")
-            return END
-        else:
-            return "refiner"
+    Context Appropriateness: Does the query match the expected context (e.g., technical vs. general)?
 
+    Grammatical Correctness and Syntax: Are there any grammatical issues or awkward sentence structures that might reduce clarity?
 
-from langgraph.checkpoint.memory import MemorySaver
+    Open-ended vs. Closed-ended Question: Is the question type appropriate for the expected answer (exploratory vs. fact-based)?
 
-builder = StateGraph(State)
-builder.add_node("question_structure", question_structure)
-builder.add_node("abbreviations", abbreviations)
-builder.add_node("keyword", keyword)
-builder.add_node("open_closed", open_closed)
-builder.add_node("refine_question", refine_question)
-builder.add_node("refinement_evaluate", refinement_evaluation)
+    Conciseness: Does the query contain unnecessary words or convoluted phrasing that could affect understanding?
 
-builder.add_edge(START, "question_structure")
-builder.add_edge(START, "abbreviations")
-builder.add_edge(START, "keyword")
-builder.add_edge(START, "open_closed")
-builder.add_edge(START, "refine_question")
-builder.add_edge("question_structure", "evaluator")
-builder.add_edge("abbreviations", "evaluator")
-builder.add_edge("keyword", "evaluator")
-builder.add_edge("open_closed", "evaluator")
-builder.add_conditional_edges("evaluator", evaluator)
-builder.add_edge("refinement_evaluate", END)
+    Tone and User Intent: Does the tone of the query align with the user's likely intent (e.g., informational, instructional)?
+    
+    {format_instructions}
 
-memory = MemorySaver()
-graph = builder.compile(checkpointer=memory)
+    **User's Question**
+    {question}
+    """
+    model = llm(model=LargeLanguageModel.PHI_4)
+    parser = JsonOutputParser(pydantic_object=QuestionStructureEval)
+    # structured_llm = model.with_structured_output(QuestionStructureEval)
+
+    prompt = PromptTemplate(
+        template=PROMPT_TEMPLATE,
+        input_variables=["question"],
+        partial_variables={"format_instructions": parser.get_format_instructions()},
+    )
+    chain = prompt | model | parser
+
+    response: QuestionStructureEval = chain.invoke({"question": state.question})
+    print("[results] question_structure: ")
+    print(response)
+    return {"question_structure_eval": response}
+
+    # question_structure: QuestionStructureEval = {
+    #     "proposal": "Updates on NewWater in Singapore",
+    #     "reasoning": "Clarify logical flow",
+    #     "score": 3,
+    # }
+    # return {"question_structure_eval": question_structure}

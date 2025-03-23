@@ -1,58 +1,59 @@
 import operator
-from typing import Annotated, Dict, List, TypedDict
+from typing import Annotated, List
+
+from pydantic import BaseModel
 
 
-class QuestionStructureEval(TypedDict):
+class InitialState(BaseModel):
+    question: str
+
+
+class QuestionStructureEval(BaseModel):
     score: int
     reasoning: str
     proposal: str
 
 
-class AbbreviationEval(TypedDict):
-    class AbbreviationExpansion(TypedDict):
+class AbbreviationEval(BaseModel):
+    class AbbreviationExpansion(BaseModel):
         abbreviation: str
         expansion: List[str]
 
     abbreviations: AbbreviationExpansion
 
 
-class DomainSpecificTermEval(TypedDict):
+class DomainSpecificTermEval(BaseModel):
     domain_terms: List[str]
-    proposal: str = "Replace with synonyms or longer explanations"
+    proposal: str
 
 
-class KeywordEval(TypedDict):
-    class KeywordExpansion(TypedDict):
+class KeywordEval(BaseModel):
+    class KeywordExpansion(BaseModel):
         keyword: str
         expanded_keywords: List[str]  # Fuzz & Expand
 
     keywords: List[KeywordExpansion]
 
 
-class OpenClosedEval(TypedDict):
-    reasoning: str
-    proposal: str
+class EvaluationResult(BaseModel):
+    question_structure_eval: QuestionStructureEval
+    abbreviations_eval: AbbreviationEval
+    domain_specific_term_eval: DomainSpecificTermEval
+    keywords_eval: KeywordEval
 
 
-class EvaluationResult(TypedDict):
-    question_structure: Annotated[QuestionStructureEval, operator.add]
-    abbreviation: Annotated[AbbreviationEval, operator.add]
-    domain_specific_term: Annotated[DomainSpecificTermEval, operator.add]
-    keyword: Annotated[KeywordEval, operator.add]
-    open_closed: Annotated[OpenClosedEval, operator.add]
-
-
-class RefinementResult(TypedDict):
+class QueryRefinementResult(BaseModel):
     intention_score: int
     similarity_score: int
     refined_question: str
 
 
-class State(TypedDict):
+class EvaluationResultQuestion(EvaluationResult):
+    question: str
 
-    class Refinement(TypedDict):
-        evaluation_results: EvaluationResult
-        refined_question_results: List[RefinementResult]
 
+class OverallState(BaseModel):
     original_question: str
-    refinements: Dict[str, Refinement]  # <question> : RefinementResult
+    evaluation_results: EvaluationResult
+    refined_question_eval: Annotated[list[QueryRefinementResult], operator.add]
+    refined_questions: Annotated[list[str], operator.add]
