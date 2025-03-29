@@ -39,15 +39,15 @@ memory = MemorySaver()
 graph = builder.compile(checkpointer=memory)
 
 
-def initialize_state(original_question: str) -> InitialState:
-    """Initializes the State with default values."""
-    return {"question": original_question}
+# def initialize_state(original_question: str) -> InitialState:
+#     """Initializes the State with default values."""
+#     return {"question": original_question}
 
 
-state = initialize_state("What is the impact of LoRA on transformer efficiency?")
+# state = initialize_state("What is the impact of LoRA on transformer efficiency?")
 
-config = {"configurable": {"thread_id": "1"}}
+# config = {"configurable": {"thread_id": "1"}}
 
-for s in graph.stream(state, config, stream_mode="values"):
-    print("=====Current Stage====")
-    print(s)
+# for s in graph.stream(state, config, stream_mode="values"):
+#     print("=====Current Stage====")
+#     print(s)

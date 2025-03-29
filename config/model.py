@@ -14,6 +14,7 @@ class LargeLanguageModel(Enum):
     DEEPSEEK_R1_1_5b = "deepseek-r1:1.5b"
     PHI_4 = "phi-4"
     GEMMA_3_1b = "gemma3:1b"
+    ALL_MINILM = "all-minilm"
 
 
 HUGGINGFACE_MODEL_MAPPING = {
@@ -33,6 +34,7 @@ OLLAMA_MODEL_MAPPING = {
     LargeLanguageModel.PHI_4: "phi4:latest",
     EmbeddingModel.BGE_M3: "bge-m3:latest",
     LargeLanguageModel.GEMMA_3_1b: "gemma3:1b",
+    LargeLanguageModel.ALL_MINILM: "all-minilm:latest",
 }
 
 
