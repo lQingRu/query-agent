@@ -13,25 +13,25 @@ class AbbreviationEval(BaseModel):
             description="Proposed expanded terms for abbreviation", default=[]
         )
 
-    abbreviations: AbbreviationExpansion = Field(
-        description="Abreviation expansion list", default=[]
+    abbreviations: List[AbbreviationExpansion] = Field(
+        description="List of abbreviations and their expanded terms", default=[]
     )
 
 
 def abbreviations_eval(state: InitialState):
     PROMPT_TEMPLATE = """
-    You are an expert assistant tasked with refining user queries for optimal performance in hybrid search. Given the query, identify any abbreviations and expand them into their full forms or alternative common expressions. 
-    
-    The goal is to ensure that the query is clear and properly represented for semantic search. Specifically, make sure that the full forms of the abbreviations are included, as this will help the embedding model to accurately represent the query in vector form. 
-    
-    This will improve the search results by ensuring all terms are correctly interpreted and represented in the semantic search space.
+    You are an expert assistant tasked with refining user queries for optimal performance in hybrid search. Given the query, identify any abbreviations and expand them into their full forms or common alternative expressions.
+
+    The goal is to ensure the query is clear and properly represented for semantic search. Expanding abbreviations will help the embedding model accurately interpret and represent the query in vector form, leading to improved search results.
+
+    Ensure that all terms are correctly expanded and represented for optimal semantic search performance.
     
     {format_instructions}
-
-    **User's Question**
+    
+    # User's Question
     {question}
     """
-    model = llm(model=LargeLanguageModel.GEMMA_3_1b)
+    model = llm(model=LargeLanguageModel.PHI_4)
     parser = JsonOutputParser(pydantic_object=AbbreviationEval)
     prompt = PromptTemplate(
         template=PROMPT_TEMPLATE,

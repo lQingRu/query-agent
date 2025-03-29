@@ -32,7 +32,7 @@ def domain_specific_terms_eval_agent(state: InitialState):
     **User's Question**
     {question}
     """
-    model = llm(model=LargeLanguageModel.GEMMA_3_1b)
+    model = llm(model=LargeLanguageModel.PHI_4)
     parser = JsonOutputParser(pydantic_object=DomainSpecificTermEval)
     prompt = PromptTemplate(
         template=PROMPT_TEMPLATE,

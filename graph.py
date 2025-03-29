@@ -8,7 +8,12 @@ from agents.evaluation.keywords import keywords_eval_agent
 from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import MemorySaver
 
+from agents.refinement.human_selection import human_selection_node
 from agents.refinement.refine_question import refine_question_eval
+from agents.refinement.refine_question_structure import refine_question_structure_node
+from agents.refinement.refine_question_with_human_input import (
+    refine_question_with_human_input_node,
+)
 from agents.state import InitialState
 
 builder = StateGraph(InitialState)
@@ -19,21 +24,30 @@ builder.add_node(domain_specific_terms_eval_agent)
 builder.add_node(refine_question_eval)
 builder.add_node(evaluation_orchestrator)
 
+# With human inputs
+builder.add_node(human_selection_node)
+builder.add_node(refine_question_with_human_input_node)
+builder.add_node(refine_question_structure_node)
+
 builder.add_edge(START, "question_structure_eval_agent")
 builder.add_edge(START, "abbreviations_eval")
 builder.add_edge(START, "keywords_eval_agent")
 builder.add_edge(START, "domain_specific_terms_eval_agent")
+builder.add_edge("question_structure_eval_agent", "refine_question_structure_node")
 
 builder.add_edge(
     [
-        "question_structure_eval_agent",
+        "refine_question_structure_node",
         "abbreviations_eval",
-        "keywords_eval_agent",
         "domain_specific_terms_eval_agent",
+        "keywords_eval_agent",
     ],
     "evaluation_orchestrator",
 )
-builder.add_edge("refine_question_eval", END)
+
+
+builder.add_edge("human_selection_node", "refine_question_with_human_input_node")
+builder.add_edge("refine_question_with_human_input_node", END)
 
 memory = MemorySaver()
 graph = builder.compile(checkpointer=memory)

@@ -20,24 +20,17 @@ class QuestionStructureEval(BaseModel):
 
 def question_structure_eval_agent(state: InitialState):
     PROMPT_TEMPLATE = """
-    You are an expert assistance in helping to refine user queries so that the query is best crafted for a precise semantic search.
-    
-    Given the query, evaluate its structure for clarity, coherence, grammatical correctness, and focus, considering the following factors:
+    You are an expert assistant tasked with evaluating user queries for their suitability in semantic search. Given the query, assess it based on the following criteria:
 
-    Clarity and Precision: Is the query clear and precise without ambiguity?
+    1. Clarity and Precision: Is the query clear and focused, without ambiguity or unnecessary complexity? Does it use specific keywords that will improve retrieval accuracy?
 
-    Focus on Key Information: Is the question concise and focused on the main topic, avoiding irrelevant details?
+    2. Focus on a Single Concept: Does the query target a single, clear concept or topic, avoiding mixed or unrelated ideas that could confuse search results?
 
-    Context Appropriateness: Does the query match the expected context (e.g., technical vs. general)?
+    3. Open-ended vs. Closed-ended: Is the query formatted appropriately for the expected answer (e.g., open-ended for exploratory searches, closed-ended for factual searches)?
 
-    Grammatical Correctness and Syntax: Are there any grammatical issues or awkward sentence structures that might reduce clarity?
+    4. Temporal Terms: Does the query contain temporal words (e.g., "when", "recent", "past") that can decrease the precision of search results?
 
-    Open-ended vs. Closed-ended Question: Is the question type appropriate for the expected answer (exploratory vs. fact-based)?
-
-    Conciseness: Does the query contain unnecessary words or convoluted phrasing that could affect understanding?
-
-    Tone and User Intent: Does the tone of the query align with the user's likely intent (e.g., informational, instructional)?
-    
+    5. Conciseness: Does the query avoid unnecessary words or convoluted phrasing that might hinder understanding or search performance?
     {format_instructions}
 
     **User's Question**
@@ -45,7 +38,6 @@ def question_structure_eval_agent(state: InitialState):
     """
     model = llm(model=LargeLanguageModel.PHI_4)
     parser = JsonOutputParser(pydantic_object=QuestionStructureEval)
-    # structured_llm = model.with_structured_output(QuestionStructureEval)
 
     prompt = PromptTemplate(
         template=PROMPT_TEMPLATE,
@@ -58,10 +50,3 @@ def question_structure_eval_agent(state: InitialState):
     print("[results] question_structure: ")
     print(response)
     return {"question_structure_eval": response}
-
-    # question_structure: QuestionStructureEval = {
-    #     "proposal": "Updates on NewWater in Singapore",
-    #     "reasoning": "Clarify logical flow",
-    #     "score": 3,
-    # }
-    # return {"question_structure_eval": question_structure}

@@ -36,10 +36,10 @@ class KeywordEval(BaseModel):
 
 
 class EvaluationResult(BaseModel):
-    question_structure_eval: QuestionStructureEval
-    abbreviations_eval: AbbreviationEval
-    domain_specific_term_eval: DomainSpecificTermEval
-    keywords_eval: KeywordEval
+    question_structure_eval: QuestionStructureEval = None
+    abbreviations_eval: AbbreviationEval = None
+    domain_specific_term_eval: DomainSpecificTermEval = None
+    keywords_eval: KeywordEval = None
 
 
 class QueryRefinementResult(BaseModel):
@@ -50,10 +50,28 @@ class QueryRefinementResult(BaseModel):
 
 class EvaluationResultQuestion(EvaluationResult):
     question: str
+    refined_questions: list[str]
 
 
 class OverallState(BaseModel):
     original_question: str
     evaluation_results: EvaluationResult
     refined_question_eval: Annotated[list[QueryRefinementResult], operator.add]
+    refined_questions: Annotated[list[str], operator.add]
+
+
+class HumanSelectionChanges(BaseModel):
+    class AbbreviationExpansion(BaseModel):
+        abbreviation: str
+        expanded: str
+
+    question: str
+    refined_question: str
+    abbreviations: List[AbbreviationExpansion]
+    domain_specific_terms: List[str]
+
+
+class RefineQueryStructure(BaseModel):
+    question: str
+    question_structure_eval: QuestionStructureEval
     refined_questions: Annotated[list[str], operator.add]
