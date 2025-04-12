@@ -15,6 +15,7 @@ class LargeLanguageModel(Enum):
     PHI_4 = "phi-4"
     GEMMA_3_1b = "gemma3:1b"
     ALL_MINILM = "all-minilm"
+    LLAMA_3_GROQ_TOOL_USE = "llama3-groq-tool-use"
 
 
 HUGGINGFACE_MODEL_MAPPING = {
@@ -35,6 +36,7 @@ OLLAMA_MODEL_MAPPING = {
     EmbeddingModel.BGE_M3: "bge-m3:latest",
     LargeLanguageModel.GEMMA_3_1b: "gemma3:1b",
     LargeLanguageModel.ALL_MINILM: "all-minilm:latest",
+    LargeLanguageModel.LLAMA_3_GROQ_TOOL_USE: "llama3-groq-tool-use:latest",
 }
 
 

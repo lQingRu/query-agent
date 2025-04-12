@@ -40,7 +40,7 @@ def refine_question_with_human_input_node(state: HumanSelectionChanges):
         )
         instructions += domain_terms_section
 
-    model = llm(model=LargeLanguageModel.PHI_4)
+    model = llm(model=LargeLanguageModel.LLAMA_3_GROQ_TOOL_USE)
     instructions = PromptTemplate(
         template=PROMPT_TEMPLATE,
         input_variables=["question", "instructions"],

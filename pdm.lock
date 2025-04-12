@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:6c769745b85b0937c958490955dec1baf2d70e3a01327452863f46774b515985"
+content_hash = "sha256:e074ec1c8a3b31bf69d384d0b64b004b157cadfd00d718d3bf0e4ba4bcb0aae4"
 
 [[metadata.targets]]
 requires_python = "==3.13.*"
@@ -168,6 +168,22 @@ files = [
     {file = "cryptography-43.0.3-cp39-abi3-win32.whl", hash = "sha256:d56e96520b1020449bbace2b78b603442e7e378a9b3bd68de65c782db1507995"},
     {file = "cryptography-43.0.3-cp39-abi3-win_amd64.whl", hash = "sha256:0c580952eef9bf68c4747774cde7ec1d85a6e61de97281f2dba83c7d2c806362"},
     {file = "cryptography-43.0.3.tar.gz", hash = "sha256:315b9001266a492a6ff443b61238f956b214dbec9910a081ba5b6646a055a805"},
+]
+
+[[package]]
+name = "fastapi"
+version = "0.115.12"
+requires_python = ">=3.8"
+summary = "FastAPI framework, high performance, easy to learn, fast to code, ready for production"
+groups = ["default"]
+dependencies = [
+    "pydantic!=1.8,!=1.8.1,!=2.0.0,!=2.0.1,!=2.1.0,<3.0.0,>=1.7.4",
+    "starlette<0.47.0,>=0.40.0",
+    "typing-extensions>=4.8.0",
+]
+files = [
+    {file = "fastapi-0.115.12-py3-none-any.whl", hash = "sha256:e94613d6c05e27be7ffebdd6ea5f388112e5e430c8f7d6494a9d1d88d43e814d"},
+    {file = "fastapi-0.115.12.tar.gz", hash = "sha256:1e2c2a2646905f9e83d32f04a3f86aff4a286669c6c950ca95b5fd68c2602681"},
 ]
 
 [[package]]
@@ -920,7 +936,6 @@ version = "0.46.1"
 requires_python = ">=3.9"
 summary = "The little ASGI library that shines."
 groups = ["default"]
-marker = "python_version ~= \"3.11\""
 dependencies = [
     "anyio<5,>=3.6.2",
     "typing-extensions>=3.10.0; python_version < \"3.10\"",
@@ -998,7 +1013,6 @@ version = "0.34.0"
 requires_python = ">=3.9"
 summary = "The lightning-fast ASGI server."
 groups = ["default"]
-marker = "python_version ~= \"3.11\""
 dependencies = [
     "click>=7.0",
     "h11>=0.8",

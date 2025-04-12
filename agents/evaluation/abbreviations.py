@@ -4,6 +4,7 @@ from agents.state import InitialState
 from config.model import LargeLanguageModel, llm
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.prompts import PromptTemplate
+from langchain_core.exceptions import OutputParserException
 
 
 class AbbreviationEval(BaseModel):
@@ -31,7 +32,7 @@ def abbreviations_eval(state: InitialState):
     # User's Question
     {question}
     """
-    model = llm(model=LargeLanguageModel.PHI_4)
+    model = llm(model=LargeLanguageModel.LLAMA_3_GROQ_TOOL_USE)
     parser = JsonOutputParser(pydantic_object=AbbreviationEval)
     prompt = PromptTemplate(
         template=PROMPT_TEMPLATE,
@@ -40,7 +41,11 @@ def abbreviations_eval(state: InitialState):
     )
     chain = prompt | model | parser
 
-    response: AbbreviationEval = chain.invoke({"question": state.question})
-    print("[results] abbreviations_eval: ")
-    print(response)
-    return {"abbreviations_eval": response}
+    try:
+        response: AbbreviationEval = chain.invoke({"question": state.question})
+        print("[results] abbreviations_eval: ")
+        print(response)
+        return {"abbreviations_eval": response}
+    except OutputParserException as ex:
+        print(ex)
+        return {"abbreviations_eval": AbbreviationEval(abbreviations=[]).model_dump()}

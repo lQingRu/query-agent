@@ -1,7 +1,6 @@
-from agents.planning_agent import PlanningAgent
+from agents.state import InitialState
+from graph import run_langgraph
 
 
 if __name__ == "__main__":
-    planning_agent = PlanningAgent()
-    planning_agent.visualize()
-    planning_agent.run("Any recent news on Ukraine and US?")
+    run_langgraph(InitialState(question="GE elections in sg 2025"))
